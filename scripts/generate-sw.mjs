@@ -22,6 +22,17 @@ for (const f of files) hash.update(f).update(readFileSync(join(dist, f)));
 const version = hash.digest('hex').slice(0, 12);
 
 const swPath = join(dist, 'sw.js');
-const sw = readFileSync(swPath, 'utf8').replace('__VERSION__', version).replace('__FILES__', JSON.stringify(['./', ...files]));
+// Replace the assignments, not the bare tokens: the header comment mentions the placeholders too,
+// and a plain string replace would patch the comment and leave `const FILES = __FILES__;` (a
+// ReferenceError that makes registration fail and `navigator.serviceWorker.ready` never resolve).
+// './' is not precached: the navigation fallback serves index.html, and a directory URL can
+// redirect or 404 on some static hosts, which would reject cache.addAll() and the whole install.
+const template = readFileSync(swPath, 'utf8');
+const sw = template
+  .replace(/const VERSION = '__VERSION__';/, `const VERSION = '${version}';`)
+  .replace(/const FILES = __FILES__;/, `const FILES = ${JSON.stringify(files)};`);
+if (sw === template || /const (VERSION|FILES) = .*__(VERSION|FILES)__/.test(sw)) {
+  throw new Error('generate-sw: placeholders not found in dist/sw.js');
+}
 writeFileSync(swPath, sw);
 console.log(`sw.js: version ${version}, ${files.length} files precached`);
