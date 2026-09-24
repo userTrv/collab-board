@@ -16,6 +16,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "lint": "ng lint",
+    "perf": "node scripts/perf.mjs",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\""
   },
   "dependencies": {
@@ -44,6 +45,7 @@
     "eslint": "^10.9.1",
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^30.0.0",
+    "playwright-core": "1.56.1",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "8.69.0",
