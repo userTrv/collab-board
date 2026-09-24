@@ -34,7 +34,7 @@
       <button type="button" class="btn ghost icon sm" (click)="session.undo.undo()" [disabled]="!session.undo.canUndo()" aria-label="Undo my last change" title="Undo my last change (Ctrl/⌘+Z)"><app-icon name="undo" /></button>
       <button type="button" class="btn ghost icon sm" (click)="session.undo.redo()" [disabled]="!session.undo.canRedo()" aria-label="Redo" title="Redo (Ctrl/⌘+Shift+Z)"><app-icon name="redo" /></button>
       <button type="button" class="btn sm" (click)="toggleHistory()" [attr.aria-pressed]="historyOpen()" aria-controls="history-panel"><app-icon name="history" [size]="14" />History</button>
-      <button type="button" class="btn sm" (click)="openInNewTab()" title="Open this board in another tab to watch live sync"><app-icon name="external" [size]="14" /><span class="hide-sm">Open in new tab</span></button>
+      <button type="button" class="btn sm" (click)="openInNewTab()" aria-label="Open in new tab" title="Open this board in another tab to watch live sync"><app-icon name="external" [size]="14" /><span class="hide-sm">Open in new tab</span></button>
       <button type="button" class="btn ghost icon sm" [cdkMenuTriggerFor]="exportMenu" aria-label="Export board" title="Export"><app-icon name="download" /></button>
       <ng-template #exportMenu>
         <div class="menu" cdkMenu>
