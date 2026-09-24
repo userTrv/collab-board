@@ -63,12 +63,14 @@ export class WorkspaceService {
     return this.index.has(id);
   }
 
-  async createBoard(content: BoardContent, options: { binary?: Uint8Array; id?: string } = {}): Promise<string> {
+  async createBoard(content: BoardContent, options: { binary?: Uint8Array; id?: string; fallbackTitle?: string } = {}): Promise<string> {
     const id = options.id ?? newId(10);
     const doc = createBoardDoc();
     let final = content;
     if (options.binary) {
       final = decodeBinaryInto(doc, options.binary);
+      const metaTitle = boardTypes(doc).meta.get('title');
+      final = { ...final, title: typeof metaTitle === 'string' && metaTitle ? metaTitle : (options.fallbackTitle ?? 'Imported board') };
     } else {
       new BoardCommands(doc, { origin: SYSTEM_ORIGIN }).applyContent(content, 'Board created');
       doc.transact(() => {

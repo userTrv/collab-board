@@ -45,7 +45,10 @@
               "includePaths": [
                 "src/styles"
               ]
-            }
+            },
+            "allowedCommonJsDependencies": [
+              "simple-peer/simplepeer.min.js"
+            ]
           },
           "configurations": {
             "production": {

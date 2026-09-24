@@ -5,8 +5,12 @@ import { boardTypes, BoardDocTypes, YEntity } from './schema';
 export interface CommandContext {
   /** Transaction origin; LOCAL_ORIGIN for the user, so the UndoManager tracks it. */
   readonly origin?: unknown;
-  /** Human readable description of the last action, collected for the history timeline. */
-  readonly describe?: (label: string) => void;
+  /**
+   * Called after every command with a human readable label (for the history timeline).
+   * `continuous` is true for commands issued many times per gesture (dragging, resizing,
+   * typing), which should be grouped into one undo step.
+   */
+  readonly describe?: (label: string, continuous: boolean) => void;
   /** Author shown on comments. */
   readonly author?: () => { name: string; color: string };
 }
@@ -26,12 +30,12 @@ export abstract class CommandBase {
     this.t = boardTypes(doc);
   }
 
-  protected run<T>(label: string, fn: () => T): T {
+  protected run<T>(label: string, fn: () => T, continuous = false): T {
     let result!: T;
     this.doc.transact(() => {
       result = fn();
     }, this.ctx.origin ?? LOCAL_ORIGIN);
-    this.ctx.describe?.(label);
+    this.ctx.describe?.(label, continuous);
     return result;
   }
 

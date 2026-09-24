@@ -5,7 +5,8 @@ import { IndexeddbPersistence } from 'y-indexeddb';
 import * as Y from 'yjs';
 import { IdentityService } from '../core/identity/identity.service';
 import { BroadcastSync } from '../core/sync/broadcast-sync';
-import { BoardCommands, CommandContext } from '../domain/board-commands';
+import { BoardCommands } from '../domain/board-commands';
+import { CommandContext } from '../domain/command-base';
 import { BoardContent } from '../domain/model';
 import { LOCAL_ORIGIN } from '../domain/origins';
 import { readBoard } from '../domain/read';
@@ -53,7 +54,15 @@ export class BoardSession {
   constructor() {
     const author = () => this.identity.me();
     this.history = new HistoryRecorder(this.doc, author);
-    const ctx: CommandContext = { origin: LOCAL_ORIGIN, describe: (l) => this.history.describe(l), author };
+    const ctx: CommandContext = {
+      origin: LOCAL_ORIGIN,
+      author,
+      describe: (label, continuous) => {
+        this.history.describe(label);
+        // Discrete actions (move, add, delete…) are one undo step each, even in quick succession.
+        if (!continuous) this.undo.stopCapturing();
+      },
+    };
     this.kanban = new BoardCommands(this.doc, ctx);
     this.whiteboard = new WhiteboardCommands(this.doc, ctx);
     this.presence = new PresenceController(this.awareness, this.identity.me());

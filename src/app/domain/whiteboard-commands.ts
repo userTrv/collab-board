@@ -42,19 +42,32 @@ export class WhiteboardCommands extends CommandBase {
     });
   }
 
+  /** Sets absolute positions (used while dragging: each frame writes the new positions). */
+  placeNotes(positions: readonly { id: Id; x: number; y: number }[]): void {
+    this.run(positions.length > 1 ? `Moved ${positions.length} notes` : 'Moved a note', () => {
+      for (const p of positions) {
+        const n = this.t.notes.get(p.id);
+        if (!n) continue;
+        const [x, y] = [Math.round(p.x), Math.round(p.y)];
+        if (n.get('x') !== x) n.set('x', x);
+        if (n.get('y') !== y) n.set('y', y);
+      }
+    }, true);
+  }
+
   resizeNote(id: Id, w: number, h: number): void {
     const n = this.t.notes.get(id);
     if (!n) return;
     this.run('Resized a note', () => {
       n.set('w', Math.max(120, Math.round(w)));
       n.set('h', Math.max(80, Math.round(h)));
-    });
+    }, true);
   }
 
   setNoteText(id: Id, text: string): void {
     const n = this.t.notes.get(id);
     if (!n || n.get('text') === text) return;
-    this.run('Edited a note', () => n.set('text', text));
+    this.run('Edited a note', () => n.set('text', text), true);
   }
 
   setNoteColor(ids: readonly Id[], color: NoteColor): void {

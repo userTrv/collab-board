@@ -14,6 +14,7 @@ export interface HistoryEntry {
 }
 
 export const MAX_HISTORY = 150;
+const UNDO_LABEL = 'Undo / redo';
 
 /**
  * Time travel via Yjs snapshots. After a burst of *local* edits settles, the tab that made them
@@ -31,7 +32,7 @@ export class HistoryRecorder {
   private readonly onAfterTransaction = (tr: Y.Transaction) => {
     const mine = tr.origin === LOCAL_ORIGIN || tr.origin instanceof Y.UndoManager;
     if (!mine || ![...tr.changedParentTypes.keys()].some((t) => this.scope.has(t))) return;
-    if (tr.origin instanceof Y.UndoManager) this.pendingLabels.push('Undo / redo');
+    if (tr.origin instanceof Y.UndoManager) this.pendingLabels.push(UNDO_LABEL);
     this.schedule();
   };
   private readonly onHistoryChange = () => this.refresh();
@@ -50,7 +51,7 @@ export class HistoryRecorder {
 
   /** Commands report what they did; the next recorded entry uses these labels. */
   describe(label: string): void {
-    this.pendingLabels.push(label);
+    if (this.pendingLabels.at(-1) !== label) this.pendingLabels.push(label);
   }
 
   /** Records immediately (e.g. before leaving the page). */
@@ -64,7 +65,8 @@ export class HistoryRecorder {
   record(label?: string): void {
     const labels = label ? [label] : this.pendingLabels;
     this.pendingLabels = [];
-    const text = labels.length === 0 ? 'Edited the board' : labels.length === 1 ? labels[0] : `${labels.at(-1)} (+${labels.length - 1} more)`;
+    const main = labels.filter((l) => l !== UNDO_LABEL).at(-1) ?? labels.at(-1);
+    const text = !main ? 'Edited the board' : labels.length === 1 ? main : `${main} (+${labels.length - 1} more)`;
     const { name, color } = this.author();
     const snapshot = Y.encodeSnapshot(Y.snapshot(this.doc));
     this.doc.transact(() => {

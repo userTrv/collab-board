@@ -36,18 +36,20 @@ export class P2PConnection {
       if (gen !== this.generation) return;
       const provider = new WebrtcProvider(`collab-board-${this.boardId}`, this.doc, {
         signaling: [settings.signalingUrl],
-        password: settings.password || null,
+        ...(settings.password ? { password: settings.password } : {}),
         awareness: this.awareness,
         // Our own BroadcastSync already covers tabs of this browser.
         filterBcConns: true,
       });
-      provider.on('peers', ({ webrtcPeers }: { webrtcPeers: string[] }) => this.peerCount.set(webrtcPeers.length));
       this.provider = provider;
       // provider 'status' only says "looking for peers"; the signaling socket state is what
       // tells the user whether their server is reachable.
       this.poll = setInterval(() => {
         const up = provider.signalingConns.some((c) => c.connected);
         this.status.set(up ? 'connected' : 'connecting');
+        // Count data channels that are actually open (the 'peers' event also lists pending ones).
+        const conns = provider.room?.webrtcConns ?? new Map<string, { connected: boolean }>();
+        this.peerCount.set([...conns.values()].filter((c) => c.connected).length);
       }, 1000);
     } catch (e) {
       this.status.set('error');
