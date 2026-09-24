@@ -1,0 +1,28 @@
+<a class="skip" href="#main" (click)="$event.preventDefault(); main.focus()">Skip to content</a>
+<header class="app-header">
+  <a class="brand" routerLink="/" aria-label="Collab Board — all boards">
+    <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--primary)" /><rect x="6" y="7" width="6" height="18" rx="2" fill="#fff" /><rect x="13.5" y="7" width="6" height="11" rx="2" fill="#fff" opacity=".7" /><rect x="21" y="7" width="5" height="14" rx="2" fill="#fff" opacity=".85" /></svg>
+    <span class="brand-name">Collab Board</span>
+  </a>
+  <nav class="nav" aria-label="Main">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Boards</a>
+    <a routerLink="/conflict-demo" routerLinkActive="active">Conflict demo</a>
+  </nav>
+  <div class="spacer"></div>
+  <button type="button" class="btn ghost me" (click)="openSettings()" title="You appear to collaborators as {{ identity.me().name }} — click to change">
+    <app-avatar [name]="identity.me().name" [color]="identity.me().color" [size]="24" />
+    <span class="me-name">{{ identity.me().name }}</span>
+  </button>
+  <button type="button" class="btn ghost icon" (click)="theme.toggle()" [attr.aria-label]="theme.theme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'" [title]="theme.theme() === 'dark' ? 'Light theme' : 'Dark theme'">
+    <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" />
+  </button>
+  <button type="button" class="btn ghost icon" (click)="openSettings()" aria-label="Settings" title="Settings">
+    <app-icon name="settings" />
+  </button>
+</header>
+@if (workspace.storageError()) {
+  <div class="storage-warning" role="alert">IndexedDB is unavailable in this browser mode — boards are kept in memory only and will be lost on reload.</div>
+}
+<main id="main" #main tabindex="-1">
+  <router-outlet />
+</main>

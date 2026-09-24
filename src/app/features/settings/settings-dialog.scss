@@ -1,0 +1,63 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dialog-body > .stack + .stack {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+h3 {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--border);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  &[aria-checked='true'] {
+    box-shadow: 0 0 0 2px var(--text);
+  }
+}
+
+.experimental {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 550;
+}
+
+small {
+  color: var(--text-faint);
+  &.error {
+    color: var(--danger);
+  }
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 12px;
+}

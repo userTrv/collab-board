@@ -1,0 +1,56 @@
+<form class="dialog" (submit)="$event.preventDefault(); save()">
+  <div class="dialog-head">
+    <h2 id="settings-title" style="font-size: 16px; flex: 1">Settings</h2>
+    <button type="button" class="btn ghost icon" aria-label="Close" (click)="ref.close()"><app-icon name="x" /></button>
+  </div>
+  <div class="dialog-body stack">
+    <section class="stack" aria-labelledby="presence-h">
+      <h3 id="presence-h">How others see you</h3>
+      <p class="muted">There are no accounts. Each tab gets a random name for presence (cursors, avatars, history).</p>
+      <label class="field">
+        <span>Display name</span>
+        <input class="input" [value]="name()" (input)="name.set($any($event.target).value)" maxlength="32" autocomplete="off" />
+      </label>
+      <div class="field">
+        <span id="color-label">Cursor colour</span>
+        <div class="swatches" role="radiogroup" aria-labelledby="color-label">
+          @for (c of colors; track c) {
+            <button type="button" class="swatch" role="radio" [attr.aria-checked]="c === color()" [attr.aria-label]="c" [style.background]="c" (click)="color.set(c)">
+              @if (c === color()) {
+                <app-icon name="check" [size]="14" />
+              }
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="stack p2p" aria-labelledby="p2p-h">
+      <h3 id="p2p-h">Cross-device sync <span class="chip experimental">Experimental</span></h3>
+      <p class="muted">
+        Tabs of this browser always sync (BroadcastChannel). To sync between devices, boards can use peer-to-peer WebRTC via
+        <code>y-webrtc</code>. It needs a <strong>signaling server you trust</strong> — public ones are often down, so this is off by default and the rest
+        of the app never depends on it. Both devices must open the same board link.
+      </p>
+      <label class="check">
+        <input type="checkbox" [checked]="p2pEnabled()" (change)="p2pEnabled.set($any($event.target).checked)" />
+        Enable peer-to-peer sync for open boards
+      </label>
+      @if (p2pEnabled()) {
+        <label class="field">
+          <span>Signaling server URL</span>
+          <input class="input" type="url" placeholder="wss://signaling.example.com" [value]="signalingUrl()" (input)="signalingUrl.set($any($event.target).value)" [attr.aria-invalid]="!!urlError()" aria-describedby="url-hint" />
+          <small id="url-hint" [class.error]="urlError()">{{ urlError() ?? 'Run your own: npx -p y-webrtc y-webrtc-signaling (listens on ws://localhost:4444).' }}</small>
+        </label>
+        <label class="field">
+          <span>Room password (optional, encrypts traffic)</span>
+          <input class="input" type="password" autocomplete="new-password" [value]="password()" (input)="password.set($any($event.target).value)" />
+        </label>
+      }
+    </section>
+  </div>
+  <div class="dialog-foot">
+    <button type="button" class="btn" (click)="ref.close()">Cancel</button>
+    <button type="submit" class="btn primary" [disabled]="!!urlError()">Save</button>
+  </div>
+</form>

@@ -1,0 +1,100 @@
+// Design tokens. Components only use these custom properties, so the dark theme is a
+// token swap (html[data-theme='dark']) rather than per-component overrides.
+:root {
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --header-h: 56px;
+  --column-w: 288px;
+
+  --bg: #f4f5f8;
+  --surface: #ffffff;
+  --surface-2: #f8f9fb;
+  --surface-3: #eef0f4;
+  --border: #e2e5eb;
+  --border-strong: #cfd4dc;
+  --text: #171a21;
+  --text-muted: #5d6675;
+  --text-faint: #8a93a3;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-soft: #eef0ff;
+  --on-primary: #ffffff;
+  --danger: #dc2626;
+  --danger-soft: #fdecec;
+  --success: #15803d;
+  --success-soft: #e7f6ec;
+  --warning: #b45309;
+  --warning-soft: #fdf3e2;
+  --focus: 0 0 0 3px color-mix(in srgb, var(--primary) 35%, transparent);
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 1px rgb(16 24 40 / 4%);
+  --shadow: 0 4px 12px rgb(16 24 40 / 8%), 0 1px 3px rgb(16 24 40 / 6%);
+  --shadow-lg: 0 18px 40px rgb(16 24 40 / 18%);
+  --canvas-dot: #d5d9e1;
+
+  --label-red: #dc2626;
+  --label-orange: #ea580c;
+  --label-yellow: #ca8a04;
+  --label-green: #16a34a;
+  --label-blue: #2563eb;
+  --label-purple: #9333ea;
+
+  --note-yellow: #fff4b8;
+  --note-pink: #ffd6e5;
+  --note-blue: #d4e8ff;
+  --note-green: #d3f5dc;
+  --note-purple: #e7dcff;
+  --note-text: #1f2328;
+
+  color-scheme: light;
+}
+
+html[data-theme='dark'] {
+  --bg: #0e1015;
+  --surface: #161920;
+  --surface-2: #1b1f27;
+  --surface-3: #232834;
+  --border: #2a303c;
+  --border-strong: #3a4250;
+  --text: #e7e9ee;
+  --text-muted: #a1a9b8;
+  --text-faint: #717a8a;
+  --primary: #8b85ff;
+  --primary-hover: #a39eff;
+  --primary-soft: #25264a;
+  --on-primary: #0e1015;
+  --danger: #f87171;
+  --danger-soft: #3a1c1f;
+  --success: #4ade80;
+  --success-soft: #16301f;
+  --warning: #fbbf24;
+  --warning-soft: #362a12;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow: 0 4px 14px rgb(0 0 0 / 45%);
+  --shadow-lg: 0 18px 40px rgb(0 0 0 / 60%);
+  --canvas-dot: #2b313d;
+
+  --label-red: #f87171;
+  --label-orange: #fb923c;
+  --label-yellow: #facc15;
+  --label-green: #4ade80;
+  --label-blue: #60a5fa;
+  --label-purple: #c084fc;
+
+  --note-yellow: #5c5223;
+  --note-pink: #5c2c40;
+  --note-blue: #22405f;
+  --note-green: #1f4a31;
+  --note-purple: #3f3364;
+  --note-text: #f1f2f4;
+
+  color-scheme: dark;
+}
