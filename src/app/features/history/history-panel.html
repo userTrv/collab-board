@@ -1,0 +1,39 @@
+<div class="head">
+  <h2>History</h2>
+  <button type="button" class="btn ghost icon sm" aria-label="Close history" (click)="closed.emit()"><app-icon name="x" /></button>
+</div>
+<p class="hint muted">Drag the slider or pick a change to preview the board at that moment. The timeline is shared by everyone on this board.</p>
+@if (entries().length) {
+  <div class="slider">
+    <input type="range" min="0" [max]="entries().length" step="1" [value]="sliderValue()" (input)="onSlider(+$any($event.target).value)"
+      aria-label="Point in time" [attr.aria-valuetext]="selectedEntry()?.label ?? 'Live board'" />
+    <div class="ends muted"><span>Oldest</span><span>Live</span></div>
+  </div>
+}
+<div class="status" aria-live="polite">
+  @if (selectedEntry(); as e) {
+    <p><strong>Previewing</strong> {{ e.ts | date: 'MMM d, HH:mm:ss' }} — read-only.</p>
+    <div class="row">
+      <button type="button" class="btn primary sm" (click)="restore.emit(e.index)"><app-icon name="history" [size]="14" />Restore this version</button>
+      <button type="button" class="btn sm" (click)="selected.set(null)">Back to live</button>
+    </div>
+    <p class="muted small">Restoring applies the old state as a new change: collaborators receive it, and you can undo it.</p>
+  } @else {
+    <p class="muted">Showing the live board.</p>
+  }
+</div>
+<ol class="list" aria-label="Changes, newest first">
+  @for (e of newestFirst(); track e.index) {
+    <li>
+      <button type="button" class="entry" [class.active]="selected() === e.index" [attr.aria-current]="selected() === e.index ? 'true' : null" (click)="selected.set(e.index)">
+        <span class="dot" [style.background]="e.color" aria-hidden="true"></span>
+        <span class="text">
+          <span class="label">{{ e.label }}</span>
+          <span class="meta muted">{{ e.by }} · {{ e.ts | date: 'MMM d, HH:mm:ss' }}</span>
+        </span>
+      </button>
+    </li>
+  } @empty {
+    <li class="muted empty">No changes recorded yet. Edit the board and entries appear here after a second.</li>
+  }
+</ol>
