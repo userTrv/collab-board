@@ -1,0 +1,74 @@
+<div class="dialog card-dialog">
+  @if (card(); as c) {
+    <div class="dialog-head">
+      <h2 id="card-dialog-title" class="sr-only">Card: {{ c.title }}</h2>
+      <input #title class="inline-edit title" [value]="c.title" aria-label="Card title" (keydown.enter)="title.blur()" (blur)="rename(title.value)" />
+      @for (p of others(); track p.clientId) {
+        <app-avatar [name]="p.user.name" [color]="p.user.color" [size]="24" [ring]="true" [title]="p.user.name + ' is also editing this card'" />
+      }
+      <button type="button" class="btn ghost icon" aria-label="Close" (click)="ref.close()"><app-icon name="x" /></button>
+    </div>
+    @if (others().length) {
+      <p class="also" role="status">{{ others()[0].user.name }}{{ others().length > 1 ? ' and others are' : ' is' }} editing this card too — the description merges character by character.</p>
+    }
+    <div class="dialog-body layout">
+      <div class="main">
+        <section>
+          <div class="section-head">
+            <h3 id="desc-h">Description</h3>
+            <div class="tabs" role="tablist" aria-label="Description mode">
+              <button type="button" role="tab" class="btn sm ghost" [attr.aria-selected]="!preview()" [attr.aria-pressed]="!preview()" (click)="preview.set(false)">Write</button>
+              <button type="button" role="tab" class="btn sm ghost" [attr.aria-selected]="preview()" [attr.aria-pressed]="preview()" (click)="preview.set(true)">Preview</button>
+            </div>
+          </div>
+          <textarea class="input desc" [hidden]="preview()" [appYText]="description" rows="6" aria-labelledby="desc-h"
+            placeholder="Add details. Supports **bold**, *italic*, `code`, - lists and links."></textarea>
+          @if (preview()) {
+            <div class="md" [innerHTML]="previewHtml() || '<p class=&quot;muted&quot;>Nothing to preview.</p>'"></div>
+          }
+        </section>
+        <app-card-checklist [cardId]="cardId" [items]="c.checklist" />
+        <app-card-comments [cardId]="cardId" [comments]="c.comments" />
+      </div>
+      <aside class="side" aria-label="Card properties">
+        <label class="field">
+          <span>Column</span>
+          <select class="input" [value]="currentColumn()" (change)="moveTo($any($event.target).value)">
+            @for (col of columns(); track col.id) {
+              <option [value]="col.id" [selected]="col.id === currentColumn()">{{ col.title }}</option>
+            }
+          </select>
+        </label>
+        <label class="field">
+          <span>Assignee</span>
+          <select class="input" (change)="setAssignee($any($event.target).value)">
+            <option value="" [selected]="!c.assigneeId">Unassigned</option>
+            @for (m of team; track m.id) {
+              <option [value]="m.id" [selected]="m.id === c.assigneeId">{{ m.name }}</option>
+            }
+          </select>
+        </label>
+        <label class="field">
+          <span>Due date</span>
+          <input class="input" type="date" [value]="c.due ?? ''" (change)="setDue($any($event.target).value)" />
+        </label>
+        <div class="field">
+          <span id="labels-h">Labels</span>
+          <div class="label-toggles" role="group" aria-labelledby="labels-h">
+            @for (l of labels; track l.id) {
+              <button type="button" class="chip label-chip label-{{ l.color }} toggle" [class.on]="c.labels.includes(l.id)" [attr.aria-pressed]="c.labels.includes(l.id)" (click)="toggleLabel(l.id)">
+                {{ l.name }}
+              </button>
+            }
+          </div>
+        </div>
+        <button type="button" class="btn danger delete" (click)="remove()"><app-icon name="trash" />Delete card</button>
+        <p class="muted hint">Undo with <span class="kbd">Ctrl/⌘ Z</span> after closing.</p>
+      </aside>
+    </div>
+  } @else {
+    <div class="dialog-head"><h2 id="card-dialog-title" style="font-size: 16px; flex: 1">Card deleted</h2></div>
+    <div class="dialog-body"><p>This card was deleted (maybe by someone in another tab).</p></div>
+    <div class="dialog-foot"><button type="button" class="btn primary" (click)="ref.close()">Close</button></div>
+  }
+</div>

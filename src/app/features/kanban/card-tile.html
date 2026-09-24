@@ -1,0 +1,32 @@
+@if (card(); as c) {
+  @if (editors().length) {
+    <div class="editing" aria-hidden="true"><span class="pulse"></span>{{ editors()[0].user.name }} is editing</div>
+  }
+  @if (labels().length) {
+    <div class="labels">
+      @for (l of labels(); track l.id) {
+        <span class="chip label-chip label-{{ l.color }}">{{ l.name }}</span>
+      }
+    </div>
+  }
+  <div class="title">{{ c.title }}</div>
+  @if (c.due || checklist() || c.comments.length || c.description || assignee()) {
+    <div class="meta">
+      @if (c.due) {
+        <span class="due {{ dueState() }}"><app-icon name="calendar" [size]="12" />{{ shortDate(c.due) }}</span>
+      }
+      @if (checklist(); as cl) {
+        <span [class.complete]="cl.done === cl.total"><app-icon name="checklist" [size]="12" />{{ cl.done }}/{{ cl.total }}</span>
+      }
+      @if (c.comments.length) {
+        <span><app-icon name="comment" [size]="12" />{{ c.comments.length }}</span>
+      }
+      @if (c.description) {
+        <span title="Has a description"><app-icon name="file" [size]="12" /></span>
+      }
+      @if (assignee(); as m) {
+        <app-avatar class="assignee" [name]="m.name" [color]="m.color" [size]="22" />
+      }
+    </div>
+  }
+}

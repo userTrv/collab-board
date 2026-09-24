@@ -1,0 +1,52 @@
+@if (column(); as col) {
+  <header class="head" [class.over]="overLimit()">
+    <button type="button" class="handle" cdkDragHandle [attr.aria-label]="'Reorder column ' + col.title + ' (drag, or use the column menu)'" title="Drag to reorder column"><app-icon name="grip" [size]="14" /></button>
+    <input #title class="inline-edit col-title" [value]="col.title" aria-label="Column title" (keydown.enter)="title.blur()" (blur)="rename(title.value)" />
+    <span class="count" [class.over]="overLimit()" [title]="col.wipLimit ? 'Work-in-progress limit: ' + col.wipLimit : 'Cards in column'">
+      {{ cardIds().length }}@if (col.wipLimit) {<span>/{{ col.wipLimit }}</span>}
+    </span>
+    <button type="button" class="btn ghost icon sm" [cdkMenuTriggerFor]="menu" [attr.aria-label]="'Column options for ' + col.title"><app-icon name="more" /></button>
+    <ng-template #menu>
+      <div class="menu" cdkMenu>
+        <button type="button" class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="editingWip.set(true)"><app-icon name="edit" />{{ col.wipLimit ? 'Change' : 'Set' }} WIP limit</button>
+        <button type="button" class="menu-item" cdkMenuItem [disabled]="index() === 0" (cdkMenuItemTriggered)="move(-1)"><app-icon name="back" />Move left</button>
+        <button type="button" class="menu-item" cdkMenuItem [disabled]="index() === count() - 1" (cdkMenuItemTriggered)="move(1)"><app-icon name="back" style="transform: scaleX(-1)" />Move right</button>
+        <div class="menu-sep"></div>
+        <button type="button" class="menu-item danger" cdkMenuItem (cdkMenuItemTriggered)="remove()"><app-icon name="trash" />Delete column</button>
+      </div>
+    </ng-template>
+  </header>
+  @if (editingWip()) {
+    <form class="wip" (submit)="$event.preventDefault(); setWip(wip.value)">
+      <label for="wip-{{ columnId() }}">WIP limit</label>
+      <input #wip id="wip-{{ columnId() }}" class="input" type="number" min="0" [value]="col.wipLimit ?? ''" placeholder="none" appAutofocus (keydown.escape)="editingWip.set(false)" />
+      <button type="submit" class="btn sm primary">Set</button>
+    </form>
+  }
+  @if (overLimit()) {
+    <p class="over-note" role="status">Over the WIP limit — finish something first.</p>
+  }
+
+  <div class="cards" cdkDropList [id]="'col-' + columnId()" [cdkDropListData]="columnId()" [cdkDropListConnectedTo]="connectedTo()" (cdkDropListDropped)="drop($event)" role="list" [attr.aria-label]="col.title + ' cards'">
+    @for (id of cardIds(); track id) {
+      <app-card-tile role="listitem" cdkDrag [cdkDragData]="id" [cardId]="id" />
+    } @empty {
+      <p class="empty">Drop cards here</p>
+    }
+  </div>
+
+  <div class="foot">
+    @if (adding()) {
+      <form (submit)="$event.preventDefault(); addCard(newTitle)">
+        <textarea #newTitle class="input" rows="2" placeholder="Card title — Enter to add, Esc to close" aria-label="New card title" appAutofocus
+          (keydown.enter)="$event.preventDefault(); addCard(newTitle)" (keydown.escape)="adding.set(false)"></textarea>
+        <div class="row">
+          <button type="submit" class="btn primary sm">Add card</button>
+          <button type="button" class="btn ghost sm" (click)="adding.set(false)">Close</button>
+        </div>
+      </form>
+    } @else {
+      <button type="button" class="btn ghost add" (click)="adding.set(true)"><app-icon name="plus" />Add card</button>
+    }
+  </div>
+}

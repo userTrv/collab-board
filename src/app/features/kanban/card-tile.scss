@@ -1,0 +1,103 @@
+:host {
+  display: block;
+  position: relative;
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  // Off-screen tiles skip layout & paint: keeps 1,000-card boards cheap without virtual scroll
+  // (which does not combine with CDK drag & drop across lists).
+  content-visibility: auto;
+  contain-intrinsic-size: auto 64px;
+  transition:
+    border-color 0.12s,
+    box-shadow 0.12s;
+  &:hover {
+    border-color: var(--border-strong);
+  }
+  &:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: var(--focus);
+  }
+}
+
+:host(.being-edited) {
+  border-color: var(--editor);
+  box-shadow: 0 0 0 1px var(--editor);
+}
+
+:host(.cdk-drag-placeholder) {
+  opacity: 0.35;
+  background: var(--surface-3);
+}
+
+.labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.title {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+}
+
+.due.overdue {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.due.today {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.complete {
+  color: var(--success);
+}
+
+.assignee {
+  margin-left: auto;
+}
+
+.editing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 6px;
+  color: var(--editor);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--editor);
+  animation: blink 1.2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.3;
+  }
+}

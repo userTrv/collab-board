@@ -1,0 +1,24 @@
+<div class="scroller" #scroller (pointermove)="trackCursor($event)" (pointerleave)="clearCursor()">
+  <div class="lanes" cdkDropList cdkDropListOrientation="horizontal" [cdkDropListData]="columnIds()" (cdkDropListDropped)="dropColumn($event)" aria-label="Columns">
+    @for (id of columnIds(); track id) {
+      <app-kanban-column cdkDrag cdkDragLockAxis="x" [cdkDragData]="id" [columnId]="id" [connectedTo]="dropListIds()" [index]="$index" [count]="columnIds().length" />
+    }
+    <div class="add-column">
+      @if (addingColumn()) {
+        <form (submit)="$event.preventDefault(); addColumn(title.value); title.value = ''">
+          <input #title class="input" placeholder="Column title" aria-label="New column title" (keydown.escape)="addingColumn.set(false)" appAutofocus />
+          <div class="row">
+            <button type="submit" class="btn primary sm">Add column</button>
+            <button type="button" class="btn ghost sm" (click)="addingColumn.set(false)">Cancel</button>
+          </div>
+        </form>
+      } @else {
+        <button type="button" class="btn ghost add" (click)="addingColumn.set(true)"><app-icon name="plus" />Add column</button>
+      }
+    </div>
+  </div>
+  <app-remote-cursors [peers]="cursorPeers()" />
+</div>
+<p class="kbd-hint muted" aria-hidden="true">
+  Drag cards and column headers · focus a card and press <span class="kbd">Alt</span>+<span class="kbd">←↑↓→</span> to move it · <span class="kbd">Enter</span> opens it
+</p>
