@@ -1,0 +1,128 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  h2 {
+    font-size: 15px;
+  }
+  .chip {
+    background: var(--success-soft);
+    color: var(--success);
+    &.offline {
+      background: var(--warning-soft);
+      color: var(--warning);
+    }
+  }
+}
+
+.stats {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  .pending strong {
+    color: var(--warning);
+  }
+}
+
+.last {
+  font-size: 12px;
+  color: var(--primary);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.column {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  h3 {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 6px 4px;
+  animation: pop 0.35s ease-out;
+}
+
+@keyframes pop {
+  from {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 40%, transparent);
+  }
+}
+
+.title {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: text;
+  overflow-wrap: anywhere;
+  width: 100%;
+}
+
+.tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0;
+  margin-top: 2px;
+}
+
+.notes-text {
+  field-sizing: content;
+  resize: none;
+  margin-top: 4px;
+  font-size: 12px;
+  min-height: 52px;
+}
+
+.add {
+  min-height: 30px;
+  font-size: 12px;
+}
+
+@media (max-width: 520px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}

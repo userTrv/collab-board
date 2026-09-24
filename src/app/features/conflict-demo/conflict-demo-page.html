@@ -1,0 +1,82 @@
+<div class="page">
+  <header class="intro">
+    <h1>Conflict demo: two replicas, offline, then merged</h1>
+    <p>
+      Both panels below are independent copies of the same board, each with its own <code>Y.Doc</code> — like a laptop and a phone. While
+      <strong>online</strong>, every edit is sent to the other side. Go <strong>offline</strong>, edit the <em>same</em> cards differently on both sides, then reconnect:
+      the CRDT merges them deterministically, with no server and no “conflict” dialog.
+    </p>
+  </header>
+
+  <div class="controls" role="group" aria-label="Demo controls">
+    <button type="button" class="btn primary" (click)="play()" [disabled]="playing()"><app-icon name="play" [size]="14" />Play the conflict scenario</button>
+    @if (online()) {
+      <button type="button" class="btn" (click)="goOffline()" [disabled]="playing()"><app-icon name="wifi-off" [size]="14" />Go offline (edit both yourself)</button>
+    } @else {
+      <button type="button" class="btn reconnect" [class.pulse]="!playing()" (click)="reconnect()" [disabled]="playing()"><app-icon name="merge" [size]="14" />Reconnect &amp; merge</button>
+    }
+    <button type="button" class="btn ghost" (click)="reset()">Reset</button>
+  </div>
+
+  <div class="status" role="status" aria-live="polite">
+    @if (playing()) {
+      <span>Playing: step {{ (step() ?? -1) + 1 }} of {{ scenario.length }}…</span>
+    } @else if (!online()) {
+      <span class="warn">Offline — {{ pending() }} unsynced {{ pending() === 1 ? 'change' : 'changes' }}. Edit either side, then press <strong>Reconnect &amp; merge</strong>.</span>
+    } @else if (converged()) {
+      <span class="ok"><app-icon name="check" [size]="14" />Converged — both replicas have identical content and identical state vectors.</span>
+    } @else {
+      <span>Syncing…</span>
+    }
+  </div>
+
+  @if (step() !== null || playing()) {
+    <ol class="steps" aria-label="Scenario steps">
+      @for (s of scenario; track $index) {
+        <li [class.done]="$index <= (step() ?? -1)" [class.current]="$index === step()" [class.a]="s.replica === 'A'" [class.b]="s.replica === 'B'">{{ s.text }}</li>
+      }
+    </ol>
+  }
+
+  <div class="replicas">
+    <app-replica-panel [replica]="replicas()[0]" [online]="online()" label="laptop (client id 1)" />
+    <div class="wire" [class.offline]="!online()" aria-hidden="true">
+      <span class="line"></span>
+      <app-icon [name]="online() ? 'wifi' : 'wifi-off'" [size]="18" />
+      <span class="line"></span>
+    </div>
+    <app-replica-panel [replica]="replicas()[1]" [online]="online()" label="phone (client id 2)" />
+  </div>
+
+  @if (report(); as lines) {
+    <section class="report" aria-labelledby="report-h">
+      <h2 id="report-h">How the merge resolved it</h2>
+      @if (lastSync(); as s) {
+        <p class="muted">On reconnect A sent B <strong>{{ s.aToB }} bytes</strong> and B sent A <strong>{{ s.bToA }} bytes</strong> — only the missing operations, computed from each side’s state vector.</p>
+      }
+      @if (lines.length) {
+        <ul>
+          @for (l of lines; track $index) {
+            <li class="kind-{{ l.kind }}">
+              <span class="tag">{{ { lww: 'last-writer-wins', 'delete-wins': 'delete wins', 'text-merge': 'text merge', 'both-kept': 'both kept', 'one-sided': 'no conflict' }[l.kind] }}</span>
+              <span>{{ l.text }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p>No overlapping edits — every change was simply applied on the other side.</p>
+      }
+    </section>
+  }
+
+  <details class="how">
+    <summary>Why doesn’t anything get lost or duplicated?</summary>
+    <ul>
+      <li><strong>Entities are keyed by id in Y.Maps</strong>, not stored in arrays. A move writes the card’s <code>columnId</code> and fractional <code>rank</code> fields — concurrent moves can’t duplicate the card, the last writer decides where it lands.</li>
+      <li><strong>Same field, concurrent writes:</strong> Yjs keeps one value, chosen identically on every replica (causal order, then client id).</li>
+      <li><strong>Delete vs. edit:</strong> writes into a deleted Y.Map are ignored, so a deleted card never comes back half-edited.</li>
+      <li><strong>Text</strong> (descriptions) is a <code>Y.Text</code>: concurrent typing interleaves character by character.</li>
+      <li><strong>Reconnect</strong> exchanges state vectors and sends only the missing updates — the same sync step 1/2 that the real app runs over BroadcastChannel between tabs.</li>
+    </ul>
+  </details>
+</div>

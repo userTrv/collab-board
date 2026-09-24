@@ -1,0 +1,42 @@
+<header>
+  <h2>Replica {{ replica().name }} <span class="muted">· {{ label() }}</span></h2>
+  <span class="chip" [class.offline]="!online()">{{ online() ? 'online' : 'offline' }}</span>
+</header>
+<div class="stats">
+  <span title="Yjs state vector: how many items from each replica this one has seen. Deletions live in a separate delete set, so they don't advance it.">state vector <strong>{{ replica().stateVector() }}</strong></span>
+  <span [class.pending]="replica().pendingOps() > 0" title="Local changes not yet delivered to the other replica">unsynced changes <strong>{{ replica().pendingOps() }}</strong></span>
+</div>
+@if (replica().lastAction(); as action) {
+  <p class="last" aria-live="polite">Last: {{ action }}</p>
+}
+<div class="columns">
+  @for (col of columns(); track col.id) {
+    <section class="column" [attr.aria-label]="col.title">
+      <h3>{{ col.title }}</h3>
+      <ul>
+        @for (id of col.cards; track id) {
+          <li class="card" [class.notes]="id === notesId">
+            @if (renaming() === id) {
+              <input #t class="input" [value]="title(id)" aria-label="Card title" (keydown.enter)="rename(id, t.value)" (keydown.escape)="renaming.set(null)" (blur)="rename(id, t.value)" />
+            } @else {
+              <button type="button" class="title" (click)="renaming.set(id)" title="Click to rename">{{ title(id) }}</button>
+            }
+            <div class="tools">
+              <button type="button" class="btn ghost icon sm" [disabled]="col.index === 0" (click)="move(id, col.index - 1)" [attr.aria-label]="'Move ' + title(id) + ' left'"><app-icon name="back" [size]="14" /></button>
+              <button type="button" class="btn ghost icon sm" [disabled]="col.index === columns().length - 1" (click)="move(id, col.index + 1)" [attr.aria-label]="'Move ' + title(id) + ' right'"><app-icon name="back" [size]="14" style="transform: scaleX(-1)" /></button>
+              <button type="button" class="btn ghost icon sm danger" (click)="replica().kanban.deleteCard(id)" [attr.aria-label]="'Delete ' + title(id)"><app-icon name="x" [size]="14" /></button>
+            </div>
+            @if (id === notesId) {
+              <textarea class="input notes-text" rows="2" [appYText]="notesText()" [attr.aria-label]="'Release notes text on replica ' + replica().name"></textarea>
+            }
+          </li>
+        }
+      </ul>
+      @if (col.index === 0) {
+        <form (submit)="$event.preventDefault(); add(newCard)">
+          <input #newCard class="input add" placeholder="+ Add card" [attr.aria-label]="'Add card on replica ' + replica().name" />
+        </form>
+      }
+    </section>
+  }
+</div>
