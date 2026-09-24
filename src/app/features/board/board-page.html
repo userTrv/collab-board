@@ -1,0 +1,71 @@
+@if (missing()) {
+  <div class="missing">
+    <h1>This board isn’t in this browser</h1>
+    <p class="muted">It may have been deleted, or the link comes from another device. Boards live in each browser’s IndexedDB.</p>
+    <div class="row">
+      <a class="btn" routerLink="/"><app-icon name="back" />All boards</a>
+      @if (p2pEnabled()) {
+        <button type="button" class="btn primary" (click)="joinShared()">Join via peer-to-peer (experimental)</button>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="toolbar" role="toolbar" aria-label="Board tools">
+    <div class="left">
+      <a class="btn ghost icon" routerLink="/" aria-label="All boards" title="All boards"><app-icon name="back" /></a>
+      <input #title class="inline-edit board-title" [value]="session.title()" aria-label="Board title" (keydown.enter)="title.blur()" (blur)="rename(title.value)" />
+      <nav class="views" aria-label="Board view">
+        <a class="btn sm" [routerLink]="['/b', session.id]" routerLinkActive #k="routerLinkActive" [routerLinkActiveOptions]="{ exact: true }" [attr.aria-current]="k.isActive ? 'page' : null"><app-icon name="kanban" [size]="14" />Kanban</a>
+        <a class="btn sm" [routerLink]="['/b', session.id, 'whiteboard']" routerLinkActive #w="routerLinkActive" [attr.aria-current]="w.isActive ? 'page' : null"><app-icon name="canvas" [size]="14" />Whiteboard</a>
+      </nav>
+    </div>
+    <div class="right">
+      <app-presence-bar [peers]="session.presence.peers()" />
+      <button type="button" class="btn sm live" [class.offline]="!session.online()" (click)="session.setOnline(!session.online())" [attr.aria-pressed]="!session.online()"
+        [title]="session.online() ? 'Syncing with other tabs. Click to simulate going offline.' : 'Offline: edits stay local. Click to reconnect and merge.'">
+        <app-icon [name]="session.online() ? 'wifi' : 'wifi-off'" [size]="14" />{{ session.online() ? 'Live' : 'Offline' }}
+      </button>
+      @if (p2pEnabled()) {
+        <span class="chip p2p" [class.ok]="session.p2p.peerCount() > 0" [title]="session.p2p.error() ?? 'Experimental WebRTC sync: signaling ' + (session.p2p.status() === 'connected' ? 'reachable' : 'not reachable') + ', ' + session.p2p.peerCount() + ' open data channels'">
+          P2P · {{ session.p2p.status() === 'connected' ? session.p2p.peerCount() + (session.p2p.peerCount() === 1 ? ' peer' : ' peers') : session.p2p.status() === 'connecting' ? 'connecting…' : session.p2p.status() }}
+        </span>
+      }
+      <span class="sep" aria-hidden="true"></span>
+      <button type="button" class="btn ghost icon sm" (click)="session.undo.undo()" [disabled]="!session.undo.canUndo()" aria-label="Undo my last change" title="Undo my last change (Ctrl/⌘+Z)"><app-icon name="undo" /></button>
+      <button type="button" class="btn ghost icon sm" (click)="session.undo.redo()" [disabled]="!session.undo.canRedo()" aria-label="Redo" title="Redo (Ctrl/⌘+Shift+Z)"><app-icon name="redo" /></button>
+      <button type="button" class="btn sm" (click)="toggleHistory()" [attr.aria-pressed]="historyOpen()" aria-controls="history-panel"><app-icon name="history" [size]="14" />History</button>
+      <button type="button" class="btn sm" (click)="openInNewTab()" title="Open this board in another tab to watch live sync"><app-icon name="external" [size]="14" /><span class="hide-sm">Open in new tab</span></button>
+      <button type="button" class="btn ghost icon sm" [cdkMenuTriggerFor]="exportMenu" aria-label="Export board" title="Export"><app-icon name="download" /></button>
+      <ng-template #exportMenu>
+        <div class="menu" cdkMenu>
+          <button type="button" class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="exportJson()"><app-icon name="file" />Export as JSON</button>
+          <button type="button" class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="exportBinary()"><app-icon name="download" />Export Yjs update (.yjs)</button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  @if (!session.online()) {
+    <div class="offline-banner" role="status">
+      <app-icon name="wifi-off" [size]="16" />
+      <span><strong>Offline (simulated).</strong> Keep editing — changes are saved locally and merge automatically when you go back <em>Live</em>.</span>
+      <button type="button" class="btn sm" (click)="session.setOnline(true)">Reconnect</button>
+    </div>
+  }
+
+  <div class="body">
+    <div class="content" [hidden]="preview() !== null">
+      @if (session.loaded()) {
+        <router-outlet />
+      } @else {
+        <p class="muted loading" role="status">Loading board…</p>
+      }
+    </div>
+    @if (preview(); as past) {
+      <app-board-preview class="content" [content]="past" [view]="view()" />
+    }
+    @if (historyOpen()) {
+      <app-history-panel id="history-panel" [entries]="session.history.entries()" [(selected)]="previewIndex" (restore)="restore($event)" (closed)="closeHistory()" />
+    }
+  </div>
+}

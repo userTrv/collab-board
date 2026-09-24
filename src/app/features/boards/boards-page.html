@@ -1,0 +1,86 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Your boards</h1>
+      <p class="muted">Stored in this browser only (IndexedDB). Works offline; tabs sync live.</p>
+    </div>
+    <div class="actions">
+      <input #file type="file" accept=".json,.yjs,.bin,application/json,application/octet-stream" hidden (change)="import(file)" />
+      <button type="button" class="btn" (click)="file.click()" title="Import a .board.json or .yjs export"><app-icon name="upload" />Import</button>
+      <button type="button" class="btn icon" [cdkMenuTriggerFor]="more" aria-label="More board options" title="More"><app-icon name="more" /></button>
+      <button type="button" class="btn primary" (click)="createBoard()"><app-icon name="plus" />New board</button>
+    </div>
+  </div>
+
+  <ng-template #more>
+    <div class="menu" cdkMenu>
+      <button type="button" class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="createDemo()"><app-icon name="kanban" />Add the demo board</button>
+      <button type="button" class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="createStressBoard()"><app-icon name="grid" />Create 1,000-card stress board</button>
+    </div>
+  </ng-template>
+
+  @if (showTip()) {
+    <aside class="tip" aria-label="How to try collaboration">
+      <app-icon name="info" [size]="18" />
+      <div>
+        <strong>Try the collaboration:</strong> open a board, then click <em>“Open in new tab”</em> in its toolbar and edit in either tab — cards, cursors and
+        “who is editing” sync instantly with no server. To see offline merging step by step, open the <a routerLink="/conflict-demo">Conflict demo</a>.
+      </div>
+      <button type="button" class="btn ghost icon sm" aria-label="Dismiss tip" (click)="dismissTip()"><app-icon name="x" [size]="14" /></button>
+    </aside>
+  }
+
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+  @if (busy(); as message) {
+    <p class="busy" role="status">{{ message }}</p>
+  }
+
+  @if (!workspace.ready()) {
+    <p class="muted" role="status">Loading boards…</p>
+  } @else if (workspace.boards().length === 0) {
+    <div class="empty">
+      <h2>No boards yet</h2>
+      <p class="muted">Create an empty board or bring back the demo board.</p>
+      <div class="actions">
+        <button type="button" class="btn" (click)="createDemo()">Add demo board</button>
+        <button type="button" class="btn primary" (click)="createBoard()"><app-icon name="plus" />New board</button>
+      </div>
+    </div>
+  } @else {
+    <ul class="grid" aria-label="Boards">
+      @for (board of workspace.boards(); track board.id) {
+        <li class="board-card">
+          @if (renaming() === board.id) {
+            <form class="rename" (submit)="$event.preventDefault(); rename(board, title.value)">
+              <input #title class="input" [value]="board.title" aria-label="Board title" (keydown.escape)="renaming.set(null)" (blur)="rename(board, title.value)" [appAutofocus]="true" />
+            </form>
+          } @else {
+            <a class="title" [routerLink]="['/b', board.id]">{{ board.title }}</a>
+          }
+          <div class="meta">
+            <span><app-icon name="kanban" [size]="13" /> {{ board.cardCount }} {{ board.cardCount === 1 ? 'card' : 'cards' }}</span>
+            <span><app-icon name="note" [size]="13" /> {{ board.noteCount }} {{ board.noteCount === 1 ? 'note' : 'notes' }}</span>
+          </div>
+          <div class="foot">
+            <span class="muted" [title]="board.updatedAt | date: 'medium'">Updated {{ board.updatedAt | relativeTime }}</span>
+            <button type="button" class="btn ghost icon sm" [cdkMenuTriggerFor]="boardMenu" [attr.aria-label]="'Options for ' + board.title"><app-icon name="more" /></button>
+          </div>
+          <ng-template #boardMenu>
+            <div class="menu" cdkMenu>
+              <a class="menu-item" cdkMenuItem [routerLink]="['/b', board.id, 'whiteboard']"><app-icon name="canvas" />Open whiteboard</a>
+              <button type="button" class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="renaming.set(board.id)"><app-icon name="edit" />Rename</button>
+              <button type="button" class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="duplicate(board)"><app-icon name="copy" />Duplicate</button>
+              <div class="menu-sep"></div>
+              <button type="button" class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="export(board, 'json')"><app-icon name="download" />Export JSON</button>
+              <button type="button" class="menu-item" cdkMenuItem (cdkMenuItemTriggered)="export(board, 'yjs')"><app-icon name="download" />Export Yjs update (.yjs)</button>
+              <div class="menu-sep"></div>
+              <button type="button" class="menu-item danger" cdkMenuItem (cdkMenuItemTriggered)="remove(board)"><app-icon name="trash" />Delete</button>
+            </div>
+          </ng-template>
+        </li>
+      }
+    </ul>
+  }
+</div>
