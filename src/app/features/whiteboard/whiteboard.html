@@ -1,0 +1,55 @@
+<app-whiteboard-toolbar
+  class="toolbar"
+  [(tool)]="tool"
+  [(snap)]="snap"
+  [selectionCount]="selection().size"
+  [canDelete]="selection().size > 0 || !!selectedConnector()"
+  [zoomPercent]="zoomPercent()"
+  (addNote)="addNote()"
+  (color)="setColor($event)"
+  (link)="linkSelected()"
+  (remove)="deleteSelection()"
+  (zoomBy)="zoomBy($event)"
+  (resetZoom)="resetZoom()"
+  (fit)="fit()"
+/>
+<div
+  #canvas
+  class="canvas"
+  [class.hand]="tool() === 'hand'"
+  [style]="gridStyle()"
+  tabindex="0"
+  role="application"
+  aria-roledescription="whiteboard"
+  aria-label="Whiteboard. Press N to add a note, Tab to focus notes, arrow keys to move the selection, Delete to remove it."
+  (pointerdown)="gestures.pointerDown($event)"
+  (pointermove)="gestures.pointerMove($event)"
+  (pointerup)="gestures.pointerUp($event)"
+  (pointercancel)="gestures.pointerUp($event)"
+  (pointerleave)="gestures.pointerLeave()"
+  (dblclick)="gestures.doubleClick($event)"
+  (wheel)="gestures.wheel($event)"
+  (keydown)="gestures.keydown($event)"
+  (keyup)="gestures.keyup($event)"
+  (focusin)="gestures.focusIn($event)"
+>
+  <div class="world" [style.transform]="worldTransform()">
+    <svg appConnectorLayer [selectedId]="selectedConnector()" [pendingLink]="pendingLink()"></svg>
+    @for (id of noteIds(); track id) {
+      <app-whiteboard-note [noteId]="id" [selected]="selection().has(id)" [editing]="editingId() === id" [linkTarget]="linkTarget() === id" (done)="stopEditing(id)" />
+    }
+    @if (marquee(); as m) {
+      <div class="marquee" [style.transform]="'translate(' + m.x + 'px,' + m.y + 'px)'" [style.width.px]="m.w" [style.height.px]="m.h"></div>
+    }
+    <app-remote-cursors [peers]="cursorPeers()" [scale]="viewport().zoom" />
+  </div>
+  @if (noteIds().length === 0) {
+    <div class="empty">
+      <p><strong>Empty whiteboard.</strong> Double-click anywhere (or press <span class="kbd">N</span>) to add a sticky note.</p>
+    </div>
+  }
+</div>
+<p class="hint muted" aria-hidden="true">
+  Double-click: new note · drag the <span class="dot"></span> handle onto another note to connect · Shift-click or drag a box to multi-select · Space-drag or
+  scroll to pan · Ctrl/⌘+scroll to zoom
+</p>
