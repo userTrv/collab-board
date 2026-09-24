@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Collab Board — offline-first kanban & whiteboard</title>
+    <base href="./" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Offline-first collaborative kanban + whiteboard. Angular 22 signals over the Yjs CRDT; tabs sync via BroadcastChannel, data stays in IndexedDB. No backend." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#4f46e5" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <script>
+      // Apply the saved/OS theme before first paint (mirrors ThemeService).
+      try {
+        var t = localStorage.getItem('cb.theme');
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <app-root></app-root>
+    <noscript>Collab Board needs JavaScript — the whole app runs in your browser.</noscript>
+  </body>
+</html>
