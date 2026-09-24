@@ -92,8 +92,21 @@ export class Whiteboard {
   addNote(at?: Point): void {
     const canvas = this.canvas().nativeElement;
     const centre = at ?? toWorld(this.viewport(), { x: canvas.clientWidth / 2, y: canvas.clientHeight / 2 });
-    const x = centre.x - 100;
-    const y = centre.y - 70;
+    let x = centre.x - 100;
+    let y = centre.y - 70;
+    if (!at) {
+      // Toolbar / N key: cascade instead of stacking exactly on the last note added the same way.
+      const snapped = (v: number) => (this.snap() ? snapTo(v) : v);
+      const taken = () =>
+        this.noteIds().some((id) => {
+          const r = this.noteRect(id);
+          return !!r && Math.abs(r.x - snapped(x)) < 12 && Math.abs(r.y - snapped(y)) < 12;
+        });
+      for (let i = 0; i < 20 && taken(); i++) {
+        x += 24;
+        y += 24;
+      }
+    }
     const id = this.session.whiteboard.addNote({ x: this.snap() ? snapTo(x) : x, y: this.snap() ? snapTo(y) : y, color: 'yellow' });
     this.selection.set(new Set([id]));
     this.editingId.set(id);
