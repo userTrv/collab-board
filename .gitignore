@@ -45,3 +45,10 @@ Thumbs.db
 
 # Local tooling
 .claude/
+
+# Секреты и ключи
+.env
+.env.*
+!.env.example
+*.pem
+*.key
